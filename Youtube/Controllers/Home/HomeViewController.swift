@@ -13,6 +13,7 @@ class HomeViewController: UIViewController {
     var videos: [Video]?
     override func viewDidLoad() {
         super.viewDidLoad()
+        scheduleLocalNotification()
         getData()
         tableView.delegate = self
         tableView.dataSource = self
@@ -23,6 +24,38 @@ class HomeViewController: UIViewController {
     
     func getData() {
         model.getVideos()
+    }
+    func scheduleLocalNotification() {
+        let center = UNUserNotificationCenter.current()
+
+        // Step 1: Request permission
+        center.requestAuthorization(options: [.alert, .sound]) { granted, error in
+            if granted {
+                // Step 2: Create content
+                let content = UNMutableNotificationContent()
+                content.title = "Hey, I'm a notification!"
+                content.body = "Look at me 👀"
+                content.sound = .default
+
+                // Step 3: Create trigger (after 5 seconds)
+                let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 10, repeats: false)
+
+                // Step 4: Create request
+                let uuidString = UUID().uuidString
+                let request = UNNotificationRequest(identifier: uuidString, content: content, trigger: trigger)
+
+                // Step 5: Add request
+                center.add(request) { error in
+                    if let error = error {
+                        print("Error adding notification: \(error.localizedDescription)")
+                    } else {
+                        print("Notification scheduled!")
+                    }
+                }
+            } else {
+                print("Permission not granted.")
+            }
+        }
     }
 }
 
