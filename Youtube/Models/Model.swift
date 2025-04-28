@@ -6,6 +6,7 @@
 //
 
 import Foundation
+
 protocol ModelDelegate: AnyObject {
     func didFetchVideos(_ videos: [Video]?)
     func didFailWithError(_ error: Error)
@@ -20,7 +21,15 @@ class Model {
             return
         }
         
-        let task = URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
+        var request = URLRequest(url: url, cachePolicy: .useProtocolCachePolicy, timeoutInterval: 10)
+        
+        request.allHTTPHeaderFields = [
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        ]
+        request.httpMethod = "GET"
+        let session = URLSession.shared
+        let task = session.dataTask(with: request) { [weak self] data, response, error in
             if let error = error {
                 self?.delegate?.didFailWithError(error)
                 return
